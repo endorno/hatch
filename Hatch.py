@@ -57,6 +57,7 @@ def index():
     cur.execute("SELECT users.user_id AS user_id, egg_id, users.name as owner_name, challenge, promise,do_when from eggs INNER JOIN users on users.user_id = eggs.user_id;")
     data = cur.fetchall()
     eggs = []
+    eggs_index = 0
     for row in data:
         egg={
             "owner_name":row["owner_name"].decode("utf-8"),
@@ -79,8 +80,9 @@ def index():
         egg["cheered"]=count
         egg["do_when"]=row["do_when"]
         egg["egg_id"]=egg_id
-
+        egg["index"] = eggs_index
         eggs.append(egg)
+        eggs_index += 1
     return render_template('eggs/list.html',eggs = eggs)
 
 @app.route("/eggs/<int:egg_id>")

@@ -3,20 +3,88 @@
     <TITLE>Hatch Top</TITLE>
     <META name="keywords" content="cheer challeng">
     <META name="description" content="hatch will make your dream come true!">
+    <link href="../static/css/bootstrap.css" rel="stylesheet">
+    
+    <link href="../static/css/bootstrap-responsive.css" rel="stylesheet">
+    <style type="text/css">
+
+      /* Sticky footer styles
+      -------------------------------------------------- */
+
+      html,
+      body {
+        height: 100%;
+        /* The html and body elements cannot have any padding or margin. */
+      }
+
+      /* Wrapper for page content to push down footer */
+      #wrap {
+        min-height: 100%;
+        height: auto !important;
+        height: 100%;
+        /* Negative indent footer by it's height */
+        margin: 0 auto -60px;
+      }
+
+      /* Set the fixed height of the footer here */
+      #push,
+      #footer {
+        height: 60px;
+      }
+      #footer {
+        background-color: #f5f5f5;
+      }
+
+      /* Lastly, apply responsive CSS fixes as necessary */
+      @media (max-width: 767px) {
+        #footer {
+          margin-left: -20px;
+          margin-right: -20px;
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+      }
+
+
+
+      /* Custom page CSS
+      -------------------------------------------------- */
+      /* Not required for template or sticky footer method. */
+
+      .container {
+        width: auto;
+        max-width: 680px;
+      }
+      .container .credit {
+        margin: 20px 0;
+      }
+
+      .btn p {
+        margin: 0 auto;
+      }
+
+    </style>
 </HEAD>
 <body>
-Welcome hatch!
-<ul class="nav pull-right">
+<div class="container">
+<h1>Welcome hatch!</h1>
+<ul class='lead' >
     {% if not logged_in %}
-        <li><a href="/facebook_login">Login or Signup</a></li>
+        <p class="btn"><a href="/facebook_login">Login or Signup</a></p>
     {% else %}
         ログインしました<br>
 
         {{ user_id }}<br/>
         {{ user_name }}<br/>
-        <li><a href="{{ url_for('index') }}">トップページへ戻る</a></li>
-        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        <p class="btn"><a href="{{ url_for('index') }}">トップページへ戻る</a></p>
+        <p class="btn"><a href="{{ url_for('logout') }}">Logout</a></p>
     {% endif %}
 </ul>
+</div>
+<div id="footer">
+      <div class="container">
+        <p class="muted credit">Hatch <a href="http://martinbean.co.uk">2013</a></p>
+      </div>
+    </div>
 </body>
 </HTML>

@@ -93,7 +93,7 @@
 {% else %}
 <div class="grid4">
 {% endif %}
-    <img src="{{ url_for('static', filename='resource/egg.png') }}" type="button" value="show!" id="my-button-{{egg.index}}"{ class='vibrate' width="98" height="133">
+    <img src="{{ url_for('static', filename='resource/egg.png') }}" type="button" value="show!" id="my-button-{{egg.index}}" class='vibrate' width="98" height="133">
     <div id="my-box-{{egg.index}}">
         <div>
         所有者：<div>{{ egg.owner_name }} {{egg.index}}</div>

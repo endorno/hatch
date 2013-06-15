@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>チェレンジ一覧</title>
+</head>
+<body>
+<div>{{ session.user_name }}の友人のリスト</div>
+<a href="/eggs/prepare">新しい挑戦をする</a>
+{% for egg in eggs %}
+    <div>
+    所有者：<div>{{ egg.owner_name }}</div>
+    何に挑戦する？:<div>{{ egg.challenge }}</div>
+    成立したら？：<div>{{ egg.promise }}</div>
+    今 {{ egg.cheered }}/{{ egg.do_when }}</div>
+    <div>
+    {% if not egg.is_own %}
+        {% if egg.already_cheered %}
+            <form action="{{ url_for('cheer',egg_id=egg.egg_id) }}" method='post' >
+                <input type="submit" value='応援した!' disabled>
+            </form>
+        {% else %}
+            <form action="{{ url_for('cheer',egg_id=egg.egg_id) }}" method='post' >
+                <input type="submit" value='応援する!'>
+            </form>
+
+        {% endif %}
+    {% endif %}
+    </div><br/>
+{% endfor %}
+</body>
+</html>

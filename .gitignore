@@ -49,11 +49,11 @@ DerivedData
 *.so
 
 # Packages
-*.egg
-*.egg-info
+#*.egg
+#*.egg-info
 dist
 build
-eggs
+#eggs
 parts
 bin
 var

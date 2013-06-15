@@ -20,7 +20,7 @@
             width:400,
             height:400,
             fadeAnimeTime:150,
-            title:'MyBox',
+            title:'Challenge!!',
             targetId:null
         };
         this.config = {};

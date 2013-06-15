@@ -82,6 +82,21 @@ def index():
         egg["do_when"]=row["do_when"]
         egg["egg_id"]=egg_id
         egg["index"] = eggs_index
+        
+        ratio = float(egg["cheered"]) / float(egg["do_when"])
+        egg['ratio'] = ratio
+        if (ratio > 0.9):
+            egg['img'] = url_for('static', filename='resource/egg_hibi.png')
+            egg['vib'] = True
+        elif (ratio > 0.65):
+            egg['img'] = url_for('static', filename='resource/egg_hibi.png')
+            egg['vib'] = False
+        elif (ratio > 0.35):
+            egg['img'] = url_for('static', filename='resource/egg_red.png')
+            egg['vib'] = False
+        else:
+            egg['img'] = url_for('static', filename='resource/egg.png')
+            egg['vib'] = False
         eggs.append(egg)
         eggs_index += 1
     return render_template('eggs/list.html',eggs = eggs)

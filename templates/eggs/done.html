@@ -56,8 +56,10 @@
         margin-top: 28px;
       }
 
-      a{color:white;}
       a:link{color:white;}
+      a:visited { color: white; }
+    　a:hover { color: white; }
+    　a:active { color: white; }
     </style>
     <link href="{{url_for('static', filename='css/bootstrap-responsive.css')}}" rel="stylesheet">
 </head>
@@ -90,7 +92,7 @@ ASIN : {{ egg.asin }}
         user：{{ cheer.user_name }}</td> <td>コメント:{{ cheer.comment }}
     </td></tr>
 {% endfor %}
-</bodt>
+</thbody>
 </table>
 </div>
 </body>

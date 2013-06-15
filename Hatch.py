@@ -34,10 +34,16 @@ def page_not_found(e):
 def error(message):
     return render_template("error.html",message=message)
 
+@app.route("/login")
+def login():
+    if (not "user_id" in session):
+        return render_template('login.html',logged_in=False)
+    return render_template('login.html',logged_in = True,user_id=session["user_id"],user_name=session["user_name"])
+
 @app.route("/")
 def index():
     if (not "user_id" in session):
-        return render_template('index.html',logged_in=False)
+        return redirect(url_for("login"))
 
     if (not "user_name" in session and "facebook_token" in session):
         data = facebook.get('/me').data
@@ -47,14 +53,7 @@ def index():
         user_name = u"名無し"
         session["user_name"]=user_name
 
-    return render_template('index.html',logged_in = True,user_id=session["user_id"],user_name=session["user_name"])
-
-@app.route("/eggs")
-def eggs():
-    if (not "user_id" in session):
-        return render_template('index.html',logged_in=False)
-    con = MySQLdb.connect(db="hatch",host="localhost",user="root")
-    cur = con.cursor(MySQLdb.cursors.DictCursor)
+    (con,cur) = my_database.get_con_cur()
     cur.execute("SELECT users.user_id AS user_id, egg_id, users.name as owner_name, challenge, promise,do_when from eggs INNER JOIN users on users.user_id = eggs.user_id;")
     data = cur.fetchall()
     eggs = []
@@ -102,7 +101,7 @@ def cheer(egg_id):
     cur.execute("INSERT IGNORE INTO cheers (user_id,egg_id,comment) values (%s,%s,%s);",
         (user_id,egg_id,"fight!"))
     con.commit()
-    return redirect("/eggs")#TODO FIX
+    return jsonify({"result":"succeed"})
 
 @app.route("/promise/candidates",methods=["POST","GET"])
 def get_promise_candidate():
@@ -112,24 +111,25 @@ def get_promise_candidate():
         {"image_url":"http://hoge/hogehoge.jpg","name":"sukebo3"}]
     })
 
+#generate egg API, return JSON file about result
 @app.route("/eggs/generate",methods=["POST","GET"])
 def generate_egg():
     #insert to DB
     if (not "user_id" in session):
-        return render_template('index.html',logged_in=False)
+        return jsonify({"result":"failed","message":"no session user_id error"})
 
     user_id = session["user_id"]
     egg_id = random.randint(10000,100000000)
     challenge = request.values["challenge"]
     promise = request.values["promise"]
     do_when = int(request.values["do_when"])
-    print "parames = %d,%d,%s,%s,%d"%(user_id,egg_id,challenge,promise,do_when)
-    con = MySQLdb.connect(db="hatch",host="localhost",user="root")
-    cur = con.cursor(MySQLdb.cursors.DictCursor)
-    cur.execute("INSERT INTO eggs (user_id,egg_id,challenge,promise,do_when) values (%s,%s,%s,%s,%s)",
+    print "%d"%user_id
+    #print u"parames = %d,%d,%s,%s,%d"%(user_id,egg_id,challenge,promise,do_when)
+    (con,cur)=my_database.get_con_cur()
+    cur.execute("INSERT IGNORE INTO eggs (user_id,egg_id,challenge,promise,do_when) values (%s,%s,%s,%s,%s)",
         (user_id,egg_id,challenge,promise,do_when))
     con.commit()
-    return redirect("/eggs")
+    return jsonify({"result":"succeed","egg":{"egg_id":12341234}})
 
 
 #----------------------------------------

@@ -5,7 +5,17 @@
 </head>
 <body>
 <div>{{ session.user_name }}の友人のリスト</div>
-<a href="/eggs/prepare">新しい挑戦をする</a>
+<form action="/eggs/generate" method="get">
+    <input type="number" name="do_when" value=20>
+    人に後押しされたら<br>
+    <input type="text" name="challenge" size="140">
+    に挑戦する！<br>
+    成立したら
+    <input type="text" name="promise" size="140">
+    をする!
+    <input type="submit" name="do">
+</form>
+
 {% for egg in eggs %}
     <div>
     所有者：<div>{{ egg.owner_name }}</div>

@@ -5,6 +5,7 @@ import os
 import random
 from flask import Flask, render_template, send_from_directory,jsonify,request,url_for
 import MySQLdb
+import amazon
 import my_database
 
 from prettyprint import pp
@@ -89,7 +90,6 @@ def egg(egg_id):
     pass
 @app.route("/done/<int:egg_id>")
 def done(egg_id):
-
     (con,cur)=my_database.get_con_cur()
     cur.execute("SELECT users.name AS user_name, comment from cheers INNER JOIN users ON cheers.user_id = users.user_id WHERE cheers.egg_id=%s"
         ,(egg_id))
@@ -97,7 +97,18 @@ def done(egg_id):
     for cheer in cheers:
         cheer["comment"]=cheer["comment"].decode("utf-8")
         cheer["user_name"]=cheer["user_name"].decode("utf-8")
-    return render_template("eggs/done.html",cheers=cheers)
+    #get buy item url in amazon
+    cur.execute("SELECT price,title,thumbnail,detail_link from eggs WHERE egg_id=%s"
+        ,(egg_id))
+    egg = cur.fetchone()
+    pp(egg)
+    for key in ["title","detail_link","asin","thumbnail"]:
+        try:
+            egg[key]=egg[key].decode('utf-8')
+        except:
+            pass
+
+    return render_template("eggs/done.html",cheers=cheers,egg=egg)
 #----------------------------------------
 # API
 #----------------------------------------
@@ -129,17 +140,17 @@ def check_done():
     for egg in eggs:
         cheered_count = my_database.cheer_count(egg["egg_id"])
         if (egg["do_when"] <= cheered_count):
-            return jsonify({"result":"done"})
+            return jsonify({"result":"done","egg_id":egg["egg_id"]})
 
     return jsonify({"result":"not_done"})
 
 @app.route("/promise/candidates",methods=["POST","GET"])
 def get_promise_candidate():
-    return jsonify({"candidates":[
-        {"image_url":"http://hoge/hogehoge.jpg","name":"sukebo1"},
-        {"image_url":"http://hoge/hogehoge.jpg","name":"sukebo2"},
-        {"image_url":"http://hoge/hogehoge.jpg","name":"sukebo3"}]
-    })
+    keywords = request.values.get("keywords",u"アイマス")
+    ama = amazon.Amazons()
+    items = ama.item_search(keywords,'All')
+
+    return jsonify({"candidates":items })
 
 #generate egg API, return JSON file about result
 @app.route("/eggs/generate",methods=["POST","GET"])
@@ -153,11 +164,16 @@ def generate_egg():
     challenge = request.values["challenge"]
     promise = request.values["promise"]
     do_when = int(request.values["do_when"])
-    print "%d"%user_id
+
+    asin = request.values.get("asin","unknown")
+    price = int(request.values.get("price",0))
+    title = request.values.get('title',"unknown")
+    thumbnail = request.values.get('thumbnail',"unknown")
+    detail_link = request.values.get('detail_link',"unknown")
     #print u"parames = %d,%d,%s,%s,%d"%(user_id,egg_id,challenge,promise,do_when)
     (con,cur)=my_database.get_con_cur()
-    cur.execute("INSERT IGNORE INTO eggs (user_id,egg_id,challenge,promise,do_when) values (%s,%s,%s,%s,%s)",
-        (user_id,egg_id,challenge,promise,do_when))
+    cur.execute("INSERT IGNORE INTO eggs (user_id,egg_id,challenge,promise,do_when,asin,price,title,thumbnail,detail_link) values (%s,%s,%s,%s,%s, %s,%s,%s,%s,%s)",
+        (user_id,egg_id,challenge,promise,do_when,asin,price,title,thumbnail,detail_link))
     con.commit()
     return jsonify({"result":"succeed","egg":{"egg_id":12341234}})
 

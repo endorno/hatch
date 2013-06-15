@@ -7,10 +7,13 @@
 <div>
 おめでとう。
 君の願いは成就した。
-さぁxxを買ってyyを始めよう！
+さぁ{{ egg.title or "hoge" }}を買って始めよう！
+値段: {{ egg.price }} <br>
+画像URL: {{ egg.thumbnail }}
+ASIN : {{ egg.asin }}
 </div>
-<input type="button" value="はじめる">
-<input type="button" value="はじめない">
+<a href="{{ egg.detail_link }}">はじめる</a>
+<a href="{{ egg.detail_link }}">はじめない</a>
 <br>
 後押ししてくれたのは
 <ul>

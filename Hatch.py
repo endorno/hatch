@@ -71,8 +71,7 @@ def index():
         #egg["cheered"]=3
         egg_id = row["egg_id"]
         (con,cur) = my_database.get_con_cur()
-        cur.execute("SELECT COUNT(DISTINCT user_id) from cheers where egg_id=%s",(egg_id))
-        count = cur.fetchall()[0]["COUNT(DISTINCT user_id)"]
+        count=my_database.cheer_count(egg_id)
         cur.execute("SELECT egg_id from cheers where egg_id=%s AND user_id = %s"
                     ,(egg_id,session["user_id"]))
         egg["already_cheered"] = True if cur.fetchone() is not None else False
@@ -94,7 +93,8 @@ def egg_prepare():
 
 @app.route("/cheer/<int:egg_id>",methods=["POST","GET"])
 def cheer(egg_id):
-    print "egg:%d is cheered by %d"%(egg_id,int(session["user_id"]))
+    if (not "user_id" in session):
+        return jsonify({"result":"failed","message":"no session user_id error"})
     user_id = session["user_id"]
 
     (con,cur) = my_database.get_con_cur()
@@ -102,6 +102,24 @@ def cheer(egg_id):
         (user_id,egg_id,"fight!"))
     con.commit()
     return jsonify({"result":"succeed"})
+
+#session のuser_idから、その人が完了したeggを返す
+@app.route("/check_done",methods=["POST","GET"])
+def check_done():
+    if (not "user_id" in session):
+        return jsonify({"result":"failed","message":"no session user_id error"})
+    user_id = session["user_id"]
+
+    (con,cur) = my_database.get_con_cur()
+    cur.execute("SELECT egg_id,do_when from eggs where user_id = %s",
+        (user_id))
+    eggs = cur.fetchall()
+    for egg in eggs:
+        cheered_count = my_database.cheer_count(egg["egg_id"])
+        if (egg["do_when"] <= cheered_count):
+            return jsonify({"result":"done"})
+
+    return jsonify({"result":"not_done"})
 
 @app.route("/promise/candidates",methods=["POST","GET"])
 def get_promise_candidate():

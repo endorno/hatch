@@ -51,17 +51,38 @@ def index():
 
 @app.route("/eggs")
 def eggs():
+    if (not "user_id" in session):
+        return render_template('index.html',logged_in=False)
     con = MySQLdb.connect(db="hatch",host="localhost",user="root")
     cur = con.cursor(MySQLdb.cursors.DictCursor)
-    cur.execute("SELECT users.name as owner_name, challenge, promise from eggs INNER JOIN users on users.user_id = eggs.user_id;")
+    cur.execute("SELECT users.user_id AS user_id, egg_id, users.name as owner_name, challenge, promise,do_when from eggs INNER JOIN users on users.user_id = eggs.user_id;")
     data = cur.fetchall()
     eggs = []
     for row in data:
-        eggs.append({
+        egg={
             "owner_name":row["owner_name"].decode("utf-8"),
             "challenge":row["challenge"].decode("utf-8"),
             "promise":row["promise"].decode("utf-8"),
-        })
+        }
+        if row["user_id"] == session["user_id"]:
+            egg["is_own"] = True
+        else:
+            egg["is_own"] = False
+
+        #egg["cheered"]=3
+        egg_id = row["egg_id"]
+        (con,cur) = my_database.get_con_cur()
+        cur.execute("SELECT COUNT(DISTINCT user_id) from cheers where egg_id=%s",(egg_id))
+        count = cur.fetchall()[0]["COUNT(DISTINCT user_id)"]
+        cur.execute("SELECT egg_id from cheers where egg_id=%s AND user_id = %s"
+                    ,(egg_id,session["user_id"]))
+        egg["already_cheered"] = True if cur.fetchone() is not None else False
+        print "%d is cheered by %d:"%(egg_id,count)
+        egg["cheered"]=count
+        egg["do_when"]=row["do_when"]
+        egg["egg_id"]=egg_id
+
+        eggs.append(egg)
     return render_template('eggs/list.html',eggs = eggs)
 
 @app.route("/eggs/prepare")
@@ -71,6 +92,17 @@ def egg_prepare():
 #----------------------------------------
 # API
 #----------------------------------------
+
+@app.route("/cheer/<int:egg_id>",methods=["POST","GET"])
+def cheer(egg_id):
+    print "egg:%d is cheered by %d"%(egg_id,int(session["user_id"]))
+    user_id = session["user_id"]
+
+    (con,cur) = my_database.get_con_cur()
+    cur.execute("INSERT IGNORE INTO cheers (user_id,egg_id,comment) values (%s,%s,%s);",
+        (user_id,egg_id,"fight!"))
+    con.commit()
+    return redirect("/eggs")#TODO FIX
 
 @app.route("/promise/candidates",methods=["POST","GET"])
 def get_promise_candidate():
@@ -90,11 +122,12 @@ def generate_egg():
     egg_id = random.randint(10000,100000000)
     challenge = request.values["challenge"]
     promise = request.values["promise"]
-    print "parames = %d,%d,%s,%s"%(user_id,egg_id,challenge,promise)
+    do_when = int(request.values["do_when"])
+    print "parames = %d,%d,%s,%s,%d"%(user_id,egg_id,challenge,promise,do_when)
     con = MySQLdb.connect(db="hatch",host="localhost",user="root")
     cur = con.cursor(MySQLdb.cursors.DictCursor)
-    cur.execute("INSERT INTO eggs (user_id,egg_id,challenge,promise) values (%s,%s,%s,%s)",
-        (user_id,egg_id,challenge,promise))
+    cur.execute("INSERT INTO eggs (user_id,egg_id,challenge,promise,do_when) values (%s,%s,%s,%s,%s)",
+        (user_id,egg_id,challenge,promise,do_when))
     con.commit()
     return redirect("/eggs")
 
@@ -138,10 +171,17 @@ def dummy_login():
     user_id = request.values.get("user_id",None)
     if user_id is None:
         return redirect(url_for('error',message="No user id"))
-    user_name = request.values.get("user_name","ダミーの名前")
+    user_id=int(user_id)
+    user = my_database.get_user(user_id)
+    user_name = ""
+    if user is None:
+        print "create new dummy user"
+        user_name = request.values.get("user_name",u"")
+        my_database.upsert_new_user(user_id,user_name)
+    else:
+        user_name= user["name"]
     session['user_id'] = user_id
     session['user_name'] = user_name
-    my_database.upsert_new_user(user_id,user_name)
     return redirect("/")
 
 
@@ -164,7 +204,7 @@ def facebook_authorized(resp):
     data = facebook.get('/me').data
     if 'id' in data and 'name' in data:
         user_name = data['name']
-        user_id = data['id']
+        user_id = int(data['id'])
         session["user_name"]=user_name
         session["user_id"]=user_id
         my_database.upsert_new_user(user_id,user_name)

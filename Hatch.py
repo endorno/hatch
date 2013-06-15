@@ -83,10 +83,21 @@ def index():
         eggs.append(egg)
     return render_template('eggs/list.html',eggs = eggs)
 
-@app.route("/eggs/prepare")
-def egg_prepare():
-    return render_template("eggs/prepare.html")
+@app.route("/eggs/<int:egg_id>")
+def egg(egg_id):
+    #TODO return egg info and if done, show buy display
+    pass
+@app.route("/done/<int:egg_id>")
+def done(egg_id):
 
+    (con,cur)=my_database.get_con_cur()
+    cur.execute("SELECT users.name AS user_name, comment from cheers INNER JOIN users ON cheers.user_id = users.user_id WHERE cheers.egg_id=%s"
+        ,(egg_id))
+    cheers = cur.fetchall()
+    for cheer in cheers:
+        cheer["comment"]=cheer["comment"].decode("utf-8")
+        cheer["user_name"]=cheer["user_name"].decode("utf-8")
+    return render_template("eggs/done.html",cheers=cheers)
 #----------------------------------------
 # API
 #----------------------------------------
@@ -96,10 +107,11 @@ def cheer(egg_id):
     if (not "user_id" in session):
         return jsonify({"result":"failed","message":"no session user_id error"})
     user_id = session["user_id"]
-
+    comment = request.values.get("comment","")
+    if comment == "":comment=u"がんばれ！"
     (con,cur) = my_database.get_con_cur()
     cur.execute("INSERT IGNORE INTO cheers (user_id,egg_id,comment) values (%s,%s,%s);",
-        (user_id,egg_id,"fight!"))
+        (user_id,egg_id,comment))
     con.commit()
     return jsonify({"result":"succeed"})
 
@@ -148,6 +160,7 @@ def generate_egg():
         (user_id,egg_id,challenge,promise,do_when))
     con.commit()
     return jsonify({"result":"succeed","egg":{"egg_id":12341234}})
+
 
 
 #----------------------------------------

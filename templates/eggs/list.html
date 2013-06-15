@@ -24,16 +24,14 @@
     今 {{ egg.cheered }}/{{ egg.do_when }}</div>
     <div>
     {% if not egg.is_own %}
+        <form action="{{ url_for('cheer',egg_id=egg.egg_id) }}" method='post' >
+        <input type="text" name="comment" size=70 placeholder="やってみろや！">
         {% if egg.already_cheered %}
-            <form action="{{ url_for('cheer',egg_id=egg.egg_id) }}" method='post' >
-                <input type="submit" value='応援した!' disabled>
-            </form>
+            <input type="submit" value='応援した!' disabled>
         {% else %}
-            <form action="{{ url_for('cheer',egg_id=egg.egg_id) }}" method='post' >
-                <input type="submit" value='応援する!'>
-            </form>
-
+            <input type="submit" value='応援する!'>
         {% endif %}
+        </form>
     {% endif %}
     </div><br/>
 {% endfor %}

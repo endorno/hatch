@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+<div>
+おめでとう。
+君の願いは成就した。
+さぁxxを買ってyyを始めよう！
+</div>
+<input type="button" value="はじめる">
+<input type="button" value="はじめない">
+<br>
+後押ししてくれたのは
+<ul>
+{% for cheer in cheers %}
+    <li>
+        user：{{ cheer.user_name }} コメント:{{ cheer.comment }}
+    </li>
+{% endfor %}
+
+</body>
+</html>

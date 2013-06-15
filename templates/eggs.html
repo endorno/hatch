@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>チェレンジ一覧</title>
+</head>
+<body>
+{% for egg in eggs %}
+    <div>
+    所有者：<div>{{ egg.owner_name }}</div>
+    何に挑戦する？:<div>{{ egg.content }}</div>
+    成立したら？：<div>{{ egg.promise }}</div>
+    </div><br/><br/>
+{% endfor %}
+</body>
+</html>

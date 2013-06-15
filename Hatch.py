@@ -1,6 +1,7 @@
 import os
 from flask import Flask, render_template, send_from_directory
-
+import MySQLdb
+from prettyprint import pp
 #----------------------------------------
 # initialization
 #----------------------------------------
@@ -33,6 +34,22 @@ def index():
         user_id = data['id']
         user_name = data['name']
     return render_template('index.html',logged_in = True,user_id=user_id,user_name=user_name)
+@app.route("/eggs")
+def eggs():
+    con = MySQLdb.connect(db="hatch",host="localhost",user="root")
+    cur = con.cursor(MySQLdb.cursors.DictCursor)
+    cur.execute("SELECT users.name as owner_name, content, promise from eggs INNER JOIN users;")
+    data = cur.fetchall()
+    eggs = []
+    for row in data:
+        pp(row)
+        eggs.append({
+            "owner_name":row["owner_name"].decode("utf-8"),
+            "content":row["content"].decode("utf-8"),
+            "primise":row["promise"].decode("utf-8"),
+        })
+    return render_template('eggs.html',eggs = eggs)
+
 
 #----------------------------------------
 # facebook authentication

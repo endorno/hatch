@@ -10,9 +10,12 @@ Welcome hatch!
     {% if not logged_in %}
         <li><a href="/facebook_login">Login or Signup</a></li>
     {% else %}
+        ログインしました<br>
+
         {{ user_id }}<br/>
         {{ user_name }}<br/>
-        <li><a href="/logout">Logout</a></li>
+        <li><a href="{{ url_for('eggs') }}">挑戦一覧を見る</a></li>
+        <li><a href="{{ url_for('logout') }}">Logout</a></li>
     {% endif %}
 </ul>
 </body>

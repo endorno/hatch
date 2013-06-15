@@ -1,6 +1,6 @@
 INSERT IGNORE into users (user_id,name) values (1,'ban_yuki'),(2,'teppei_fujisawa'),(3,'taro_ziro');
 
-INSERT IGNORE into eggs (user_id,egg_id,content,promise) values
+INSERT IGNORE into eggs (user_id,egg_id,challenge,promise) values
 (1,1001,'スケボーを始める','スケボーを買う'),
 (1,1002,'○○へ美味しいケーキを食べに行く','○○を誘う'),
 (2,2001,'サバゲーを撮影する','GoProを買う'),

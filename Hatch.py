@@ -1,6 +1,12 @@
+#! /usr/bin/env python
+# -*- coding:utf-8 -*-
+
 import os
-from flask import Flask, render_template, send_from_directory
+import random
+from flask import Flask, render_template, send_from_directory,jsonify,request,url_for
 import MySQLdb
+import my_database
+
 from prettyprint import pp
 #----------------------------------------
 # initialization
@@ -24,31 +30,73 @@ def favicon():
 def page_not_found(e):
     return render_template('404.html'), 404
 
+@app.route("/error/<message>")
+def error(message):
+    return render_template("error.html",message=message)
+
 @app.route("/")
 def index():
-    if (not "facebook_token" in session):
+    if (not "user_id" in session):
         return render_template('index.html',logged_in=False)
-    data = facebook.get('/me').data
-    print data
-    if 'id' in data and 'name' in data:
-        user_id = data['id']
-        user_name = data['name']
-    return render_template('index.html',logged_in = True,user_id=user_id,user_name=user_name)
+
+    if (not "user_name" in session and "facebook_token" in session):
+        data = facebook.get('/me').data
+        if 'name' in data:
+            session["user_name"]=data['name']
+    if (not "user_name" in session):
+        user_name = u"名無し"
+        session["user_name"]=user_name
+
+    return render_template('index.html',logged_in = True,user_id=session["user_id"],user_name=session["user_name"])
+
 @app.route("/eggs")
 def eggs():
     con = MySQLdb.connect(db="hatch",host="localhost",user="root")
     cur = con.cursor(MySQLdb.cursors.DictCursor)
-    cur.execute("SELECT users.name as owner_name, content, promise from eggs INNER JOIN users;")
+    cur.execute("SELECT users.name as owner_name, challenge, promise from eggs INNER JOIN users on users.user_id = eggs.user_id;")
     data = cur.fetchall()
     eggs = []
     for row in data:
-        pp(row)
         eggs.append({
             "owner_name":row["owner_name"].decode("utf-8"),
-            "content":row["content"].decode("utf-8"),
-            "primise":row["promise"].decode("utf-8"),
+            "challenge":row["challenge"].decode("utf-8"),
+            "promise":row["promise"].decode("utf-8"),
         })
-    return render_template('eggs.html',eggs = eggs)
+    return render_template('eggs/list.html',eggs = eggs)
+
+@app.route("/eggs/prepare")
+def egg_prepare():
+    return render_template("eggs/prepare.html")
+
+#----------------------------------------
+# API
+#----------------------------------------
+
+@app.route("/promise/candidates",methods=["POST","GET"])
+def get_promise_candidate():
+    return jsonify({"candidates":[
+        {"image_url":"http://hoge/hogehoge.jpg","name":"sukebo1"},
+        {"image_url":"http://hoge/hogehoge.jpg","name":"sukebo2"},
+        {"image_url":"http://hoge/hogehoge.jpg","name":"sukebo3"}]
+    })
+
+@app.route("/eggs/generate",methods=["POST","GET"])
+def generate_egg():
+    #insert to DB
+    if (not "user_id" in session):
+        return render_template('index.html',logged_in=False)
+
+    user_id = session["user_id"]
+    egg_id = random.randint(10000,100000000)
+    challenge = request.values["challenge"]
+    promise = request.values["promise"]
+    print "parames = %d,%d,%s,%s"%(user_id,egg_id,challenge,promise)
+    con = MySQLdb.connect(db="hatch",host="localhost",user="root")
+    cur = con.cursor(MySQLdb.cursors.DictCursor)
+    cur.execute("INSERT INTO eggs (user_id,egg_id,challenge,promise) values (%s,%s,%s,%s)",
+        (user_id,egg_id,challenge,promise))
+    con.commit()
+    return redirect("/eggs")
 
 
 #----------------------------------------
@@ -81,6 +129,21 @@ def get_facebook_token():
 def pop_login_session():
     session.pop('logged_in', None)
     session.pop('facebook_token', None)
+    session.pop('user_name',None)
+    session.pop('user_id',None)
+
+@app.route("/dummy_login")
+def dummy_login():
+    session['logged_in'] = True
+    user_id = request.values.get("user_id",None)
+    if user_id is None:
+        return redirect(url_for('error',message="No user id"))
+    user_name = request.values.get("user_name","ダミーの名前")
+    session['user_id'] = user_id
+    session['user_name'] = user_name
+    my_database.upsert_new_user(user_id,user_name)
+    return redirect("/")
+
 
 @app.route("/facebook_login")
 def facebook_login():
@@ -96,8 +159,19 @@ def facebook_authorized(resp):
 
     session['logged_in'] = True
     session['facebook_token'] = (resp['access_token'], '')
-    print "access token set:",resp['access_token']
 
+    #create new user if user_id is new
+    data = facebook.get('/me').data
+    if 'id' in data and 'name' in data:
+        user_name = data['name']
+        user_id = data['id']
+        session["user_name"]=user_name
+        session["user_id"]=user_id
+        my_database.upsert_new_user(user_id,user_name)
+    else:
+        return redirect(url_for('error',message="can't get facebook id or name"))
+
+    print "access token set:",resp['access_token']
     return redirect(next_url)
 
 @app.route("/logout")

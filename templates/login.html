@@ -7,84 +7,74 @@
     
     <link href="../static/css/bootstrap-responsive.css" rel="stylesheet">
     <style type="text/css">
-
-      /* Sticky footer styles
-      -------------------------------------------------- */
-
-      html,
       body {
-        height: 100%;
-        /* The html and body elements cannot have any padding or margin. */
+        padding-top: 20px;
+        padding-bottom: 40px;
       }
 
-      /* Wrapper for page content to push down footer */
-      #wrap {
-        min-height: 100%;
-        height: auto !important;
-        height: 100%;
-        /* Negative indent footer by it's height */
-        margin: 0 auto -60px;
-      }
-
-      /* Set the fixed height of the footer here */
-      #push,
-      #footer {
-        height: 60px;
-      }
-      #footer {
-        background-color: #f5f5f5;
-      }
-
-      /* Lastly, apply responsive CSS fixes as necessary */
-      @media (max-width: 767px) {
-        #footer {
-          margin-left: -20px;
-          margin-right: -20px;
-          padding-left: 20px;
-          padding-right: 20px;
-        }
-      }
-
-
-
-      /* Custom page CSS
-      -------------------------------------------------- */
-      /* Not required for template or sticky footer method. */
-
-      .container {
-        width: auto;
-        max-width: 680px;
-      }
-      .container .credit {
-        margin: 20px 0;
-      }
-
-      .btn p {
+      /* Custom container */
+      .container-narrow {
         margin: 0 auto;
+        max-width: 700px;
+      }
+      .container-narrow > hr {
+        margin: 30px 0;
       }
 
+      /* Main marketing message and sign up button */
+      .jumbotron {
+        margin: 60px 0;
+        margin-left:auto;    /* 左側マージンを自動的に空ける */
+        margin-right:auto;   /* 右側マージンを自動的に空ける */
+        text-align: center;
+        max-width: 600px;
+      }
+      .jumbotron h1 {
+        font-size: 72px;
+        line-height: 1;
+      }
+      .jumbotron .btn {
+        font-size: 21px;
+        padding: 14px 24px;
+      }
+
+      .tb {
+        max-width: 400px;
+      }
+
+      /* Supporting marketing content */
+      .marketing {
+        margin: 60px 0;
+      }
+      .marketing p + h4 {
+        margin-top: 28px;
+      }
+
+      a{color:white;}
+      a:link{color:white;}
+      a:visited { color: white; }
+    　a:hover { color: white; }
+    　a:active { color: white; }
     </style>
 </HEAD>
 <body>
-<div class="container">
+<div class="jumbotron">
+<div class="hero-unit">
 <h1>Welcome hatch!</h1>
 <ul class='lead' >
     {% if not logged_in %}
-        <p class="btn"><a href="/facebook_login">Login or Signup</a></p>
+        <p class="btn btn-primary"><a href="/facebook_login">Login or Signup</a></p>
     {% else %}
         ログインしました<br>
 
         {{ user_id }}<br/>
         {{ user_name }}<br/>
-        <p class="btn"><a href="{{ url_for('index') }}">トップページへ戻る</a></p>
-        <p class="btn"><a href="{{ url_for('logout') }}">Logout</a></p>
+        <p class="btn btn-primary"><a href="{{ url_for('index') }}">トップページへ戻る</a></p>
+        <p class="btn btn-primary"><a href="{{ url_for('logout') }}">Logout</a></p>
     {% endif %}
 </ul>
 </div>
-<div id="footer">
-      <div class="container">
-        <p class="muted credit">Hatch <a href="http://martinbean.co.uk">2013</a></p>
-      </div>
-    </div>
+</div>
+
 </body>
 </HTML>

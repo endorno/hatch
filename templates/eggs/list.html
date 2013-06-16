@@ -15,11 +15,13 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery.nBox.css') }}" type="text/css" >
     <script src="{{ url_for('static', filename='js/jquery.nBox.js') }}"></script>
     <style>
-    .container { width: 940px; margin: 0 auto;}
+    .container { width: 940px; margin: 0 auto;     margin-left:auto;    /* 左側マージンを自動的に空ける */
+        margin-right:auto;   /* 右側マージンを自動的に空ける */
+        text-align: center;}
 .grid1, .grid2, .grid3, .grid4, .grid5, .grid6, .grid7, .grid8, .grid9, .grid10, .grid11 {
   float: left;
   display: inline;
-  margin-left: 20px;
+  margin-left: 60px;
 }
 .grid1 {width: 60px;}
 .grid2 {width: 140px;}
@@ -41,6 +43,15 @@
   content: " ";
   clear: both;
   height: 0;
+      margin-left:auto;    /* 左側マージンを自動的に空ける */
+        margin-right:auto;   /* 右側マージンを自動的に空ける */
+        text-align: center;
+}
+
+.content {
+    margin-left:auto;    /* 左側マージンを自動的に空ける */
+        margin-right:auto;   /* 右側マージンを自動的に空ける */
+        text-align: center;
 }
 
       body {
@@ -62,12 +73,12 @@
             var myBox = $('#my-box-' + (i).toString(10));
             myButton.nBox({
                 targetId:'my-box-' + (i).toString(10),
-                width:300,
-                height:150
+                width:330,
+                height:200
             });
             myBox.click(function(){
                 myButton.nBox('hide');
-            });
+            })
         }
 
     });
@@ -113,6 +124,7 @@
     <link href="{{ url_for('static', filename='css/bootstrap-responsive.css') }}" rel="stylesheet">
 </head>
 <body>
+<div class="conent">
 <div>{{ session.user_name }}の友人のリスト</div>
 <form id="challenge" name="challenge" action="{{ url_for('generate_egg') }}">
     何がしたい？
@@ -149,17 +161,22 @@
 {% if egg.index % 3 == 0 %}
 <div class="grid3 first">
 {% else %}
-<div class="grid4">
+<div class="grid3">
 {% endif %}
-    <img src="{{ url_for('static', filename='resource/egg.png') }}" type="button" value="show!" id="my-button-{{egg.index}}"{ class='vibrate' width="98" height="133">
+    {% if egg.vib == True %}
+    <div id='demo20'>
+    {% endif %}
+    <img src={{ egg.img }} type="button" value="show!" id="my-button-{{egg.index}}" class='vibrate' width="98" height="133">
+    {% if egg.vib == True %}
+    </div>
+    {% endif %}
     <div id="my-box-{{egg.index}}">
-        <div>
-        所有者：<div>{{ egg.owner_name }} {{egg.index}}</div>
-        何に挑戦する？:<div>{{ egg.challenge }}</div>
-        成立したら？：<div>{{ egg.promise }}</div>
-        今 {{ egg.cheered }}/{{ egg.do_when }}</div>
-        <div>
-            <div>
+        <div class="egg_pop">
+        <strong>所有者： </strong><div align="center">{{ egg.owner_name }}</div>
+        <strong>何に挑戦する？</strong>:<div align="center">{{ egg.challenge }}</div>
+        <strong>成立したら？</strong>：<div align="center">{{ egg.promise }}</div>
+        <strong align="right"><big>今 {{ egg.cheered }}/{{ egg.do_when }}</big></strong></div>
+
     {% if not egg.is_own %}
         <form action="{{ url_for('cheer',egg_id=egg.egg_id) }}" method='post' >
         <input type="text" name="comment" size=70 placeholder="やってみろや！">
@@ -170,30 +187,10 @@
         {% endif %}
         </form>
     {% endif %}
-    </div>
-        <div><button class="my-box-close"> 閉じる </button></div>
-    </div>
 </div>
-    <!--<div>
-    所有者：<div>{{ egg.owner_name }} {{egg.index}}</div>
-    何に挑戦する？:<div>{{ egg.challenge }}</div>
-    成立したら？：<div>{{ egg.promise }}</div>
-    今 {{ egg.cheered }}/{{ egg.do_when }}</div>
-    <div>
-    {% if not egg.is_own %}
-        <form action="{{ url_for('cheer',egg_id=egg.egg_id) }}" method='post' >
-        <input type="text" name="comment" size=70 placeholder="やってみろや！">
-        {% if egg.already_cheered %}
-            <input type="submit" value='応援した!' disabled>
-        {% else %}
-            <input type="submit" value='応援する!'>
-        {% endif %}
-        </form>
-    {% endif %}
-    </div>-->
-    
 </div>
 {% endfor %}
+</div>
 </div>
 </body>
 </html>

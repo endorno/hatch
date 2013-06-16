@@ -2,26 +2,98 @@
 <html>
 <head>
     <title></title>
+    <script src="{{ url_for('static', filename='js/jquery.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='js/jquery-1.7.2.min.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='js/jquery.jrumble.1.3.min.js') }}" type="text/javascript"></script> 
+    <script src="{{ url_for('static', filename='js/prettify.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='js/test.js') }}" type="text/javascript"></script>
+    <link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/prettify.css') }}" type="text/css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery.nBox.css') }}" type="text/css" >
+    <script src="{{ url_for('static', filename='js/jquery.nBox.js') }}"></script>
+    <link href="{{url_for('static', filename='css/bootstrap.css')}}" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 20px;
+        padding-bottom: 40px;
+      }
+
+      /* Custom container */
+      .container-narrow {
+        margin: 0 auto;
+        max-width: 700px;
+      }
+      .container-narrow > hr {
+        margin: 30px 0;
+      }
+
+      /* Main marketing message and sign up button */
+      .jumbotron {
+        margin: 60px 0;
+        margin-left:auto;    /* 左側マージンを自動的に空ける */
+     	margin-right:auto;   /* 右側マージンを自動的に空ける */
+        text-align: center;
+        max-width: 600px;
+      }
+      .jumbotron h1 {
+        font-size: 72px;
+        line-height: 1;
+      }
+      .jumbotron .btn {
+        font-size: 21px;
+        padding: 14px 24px;
+      }
+
+      .tb {
+      	max-width: 400px;
+      }
+
+      /* Supporting marketing content */
+      .marketing {
+        margin: 60px 0;
+      }
+      .marketing p + h4 {
+        margin-top: 28px;
+      }
+
+      a:link{color:white;}
+      a:visited { color: white; }
+    　a:hover { color: white; }
+    　a:active { color: white; }
+    </style>
+    <link href="{{url_for('static', filename='css/bootstrap-responsive.css')}}" rel="stylesheet">
 </head>
 <body>
-<div>
-おめでとう。
+<div class="jumbotron">
+<div class="hero-unit">
+<h2>おめでとう。</h2>
+<div id='demo16'>
+<img src="{{ url_for('static', filename='resource/egg_hibi.png') }}" id="my-button-{{egg.index}}" class='vibrate' width="98" height="133">
+</div>
 君の願いは成就した。
-さぁ{{ egg.title or "hoge" }}を買って始めよう！
-値段: {{ egg.price }} <br>
-画像URL: {{ egg.thumbnail }}
+さぁ<strong><big>{{ egg.title or "hoge" }}</big></strong>を買って始めよう！
+<p class="lead">
+	<div class="hiro-left">
+	<img src="{{ egg.thumbnail }}" id="my-button-{{egg.index}}" class='vibrate' width="98" height="133">
+値段: {{ egg.price }} 
 ASIN : {{ egg.asin }}
 </div>
-<a href="{{ egg.detail_link }}">はじめる</a>
-<a href="{{ egg.detail_link }}">はじめない</a>
+</p>
+<button class="btn btn-primary"><a href="{{ egg.detail_link }}">はじめる</a></button>
+<button class="btn"><a href="{{ egg.detail_link }}">はじめない</a></button>
+</div>
 <br>
 後押ししてくれたのは
-<ul>
-{% for cheer in cheers %}
-    <li>
-        user：{{ cheer.user_name }} コメント:{{ cheer.comment }}
-    </li>
-{% endfor %}
+<table class="table table-striped tb">
+	<thbody>
 
+{% for cheer in cheers %}
+    <tr><td>
+        user：{{ cheer.user_name }}</td> <td>コメント:{{ cheer.comment }}
+    </td></tr>
+{% endfor %}
+</thbody>
+</table>
+</div>
 </body>
 </html>

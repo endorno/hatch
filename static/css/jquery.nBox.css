@@ -47,7 +47,7 @@
     display:block;
     width:22px;
     height:22px;
-    background:url(../img/box-close-btn.png) no-repeat;
+    background:url(../resource/box-close-btn.png) no-repeat;
 }
 #nBox .nBox-window-close img {
     cursor:pointer;

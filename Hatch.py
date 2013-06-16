@@ -157,6 +157,7 @@ def get_promise_candidate():
 #generate egg API, return JSON file about result
 @app.route("/eggs/generate",methods=["POST","GET"])
 def generate_egg():
+    print "generate egg!"
     #insert to DB
     if (not "user_id" in session):
         return jsonify({"result":"failed","message":"no session user_id error"})
@@ -177,7 +178,8 @@ def generate_egg():
     cur.execute("INSERT IGNORE INTO eggs (user_id,egg_id,challenge,promise,do_when,asin,price,title,thumbnail,detail_link) values (%s,%s,%s,%s,%s, %s,%s,%s,%s,%s)",
         (user_id,egg_id,challenge,promise,do_when,asin,price,title,thumbnail,detail_link))
     con.commit()
-    return jsonify({"result":"succeed","egg":{"egg_id":12341234}})
+    #return jsonify({"result":"succeed","egg":{"egg_id":12341234}})
+    return redirect(url_for("index"))
 
 
 

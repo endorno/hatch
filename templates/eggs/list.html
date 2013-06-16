@@ -58,33 +58,91 @@
     <script type="text/javascript">
     $(function(){
         for (var i=0; i <=10; i++) {
-        var myButton = $('#my-button-' + (i).toString(10));
-        var myBox = $('#my-box-' + (i).toString(10));
-        myButton.nBox({
-            targetId:'my-box-' + (i).toString(10),
-            width:300,
-            height:150
-        });
-        myBox.click(function(){
-            myButton.nBox('hide');
-        })
+            var myButton = $('#my-button-' + (i).toString(10));
+            var myBox = $('#my-box-' + (i).toString(10));
+            myButton.nBox({
+                targetId:'my-box-' + (i).toString(10),
+                width:300,
+                height:150
+            });
+            myBox.click(function(){
+                myButton.nBox('hide');
+            });
         }
+
     });
+    function get_amazon_html(index,title){
+        return "<p><input type='radio' name='amazon' value='"+index+"'>"+title+"</p>"
+    }
+    var selected_amazon_items = [];
+    function create_parameter(index){
+        var item = selected_amazon_items[index];
+        return "&title="+item.title+"&price="+item.price+"&thumbnail="+item.thumbnail+
+                "&detail_link="+item.thumbnail;
+    }
+    function amazon_get(){
+        console.log("amazon_get");
+        $('form[name=challenge]').submit(function(){
+            console.log("amazon_get_submit");
+            $.post("/promise/candidates", $(this).serialize(), function(json) {
+                //for(var i = 0; i < json["candidates"].length; i++){
+                for(var i = 0; i < json["candidates"].length && i < 5; i++){
+                    var item = json["candidates"][i];
+                    selected_amazon_items[i]=item;
+                    $("#amason_candidate").append(get_amazon_html(i,item.title));
+                }
+                console.log("append to amason_list");
+            }, 'json');
+            return false;
+        });
+    };
+    function form_submit(){
+        console.log("form_submit");
+        var val = $('#challenge [name=amazon]:checked').val();
+        var form = $('form[name=challenge]');
+        console.log("val =", val);
+        console.log(form.serialize()+create_parameter(val));
+        $.post("/eggs/generate", form.serialize()+create_parameter(val), function(json) {
+            console.log("redirect");
+            location.href="/";
+        });
+        return false;
+    };
+
     </script>
     <link href="{{ url_for('static', filename='css/bootstrap-responsive.css') }}" rel="stylesheet">
 </head>
 <body>
 <div>{{ session.user_name }}の友人のリスト</div>
-<form action="/eggs/generate" method="get">
-    <input type="number" name="do_when" value=20>
-    人に後押しされたら<br>
-    <input type="text" name="challenge" size="140">
-    に挑戦する！<br>
+<form id="challenge" name="challenge" action="{{ url_for('generate_egg') }}">
+    何がしたい？
+    <input type="text" name="challenge" size="140"><br>
+    それって何が必要？
+    <input type="text" name="keywords" size="30"><br>
+
+    何人の後押しが必要？<br>
+    <input type="number" name="do_when" value=20><br>
+    <button  onclick="amazon_get();" >
+        Amazon Get
+    </button>
+
     成立したら
     <input type="text" name="promise" size="140">
     をする!
-    <input type="submit" name="do">
+    <button onclick="form_submit();" >
+        挑戦
+    </button>
+    <div id="amason_candidate">
+    </div>
 </form>
+
+<div id="amazon_list">
+    <div class="each-comment">
+    </div>
+    <div class="each-comment">
+    </div>
+    <div id="new-comment"></div>
+</div>
 
 <div class='container clearfix'>
 {% for egg in eggs %}
